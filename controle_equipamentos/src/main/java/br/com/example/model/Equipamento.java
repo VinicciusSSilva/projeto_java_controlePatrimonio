@@ -1,38 +1,31 @@
 package br.com.example.model;
 
-
 public class Equipamento {
-    
-    // Atributos privados encapsulados da classe
-    private int patrimonio;
-    private String descricao;
-    private String laboratorio;
-    private String situacao;
+    private int patrimonio; // Identificador unico (chave primaria no banco)
+    private String descricao; // Texto descritivo do equipamento
+    private String laboratorio; // Nome ou codigo do laboratorio onde se encontra
+    private String situacao; // Estado atual: Disponível, Em uso ou Em manutenção
 
-    // Construtor vazio (permite instanciar o objeto sem passar valores iniciais)
-    public Equipamento() {}
+    public Equipamento() {} // Construtor padrao sem argumentos
 
-    // Construtor cheio (inicializa o objeto já com todos os atributos preenchidos)
-    public Equipamento(int patrimonio, String descricao, String laboratorio, String situacao) {
-        this.patrimonio = patrimonio;
-        this.descricao = descricao;
-        this.laboratorio = laboratorio;
-        this.situacao = situacao;
+    public Equipamento(int patrimonio, String descricao, String laboratorio, String situacao) { // Construtor completo da classe mae
+        this.patrimonio = patrimonio; // Atribui o patrimonio
+        this.descricao = descricao; // Atribui a descricao
+        this.laboratorio = laboratorio; // Atribui o laboratorio
+        this.situacao = situacao; // Atribui a situacao
     }
 
-    // Métodos Getter e Setter para acessar e modificar o patrimônio
-    public int getPatrimonio() { return patrimonio; }
-    public void setPatrimonio(int patrimonio) { this.patrimonio = patrimonio; }
+    public int getPatrimonio() { return patrimonio; } // Retorna o patrimonio
+    public void setPatrimonio(int patrimonio) { this.patrimonio = patrimonio; } // Altera o patrimonio
 
-    // Métodos Getter e Setter para acessar e modificar a descrição
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
+    public String getDescricao() { return descricao; } // Retorna a descricao
+    public void setDescricao(String descricao) { this.descricao = descricao; } // Altera a descricao
 
-    // Métodos Getter e Setter para acessar e modificar o laboratório
-    public String getLaboratorio() { return laboratorio; }
-    public void setLaboratorio(String laboratorio) { this.laboratorio = laboratorio; }
+    public String getLaboratorio() { return laboratorio; } // Retorna o laboratorio
+    public void setLaboratorio(String laboratorio) { this.laboratorio = laboratorio; } // Altera o laboratorio
 
-    // Métodos Getter e Setter para acessar e modificar a situação
-    public String getSituacao() { return situacao; }
-    public void setSituacao(String situacao) { this.situacao = situacao; }
+    public String getSituacao() { return situacao; } // Retorna a situacao
+    public void setSituacao(String situacao) { this.situacao = situacao; } // Altera a situacao
 }
+
+

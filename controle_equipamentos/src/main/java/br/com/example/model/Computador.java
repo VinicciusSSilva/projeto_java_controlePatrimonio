@@ -1,19 +1,13 @@
 package br.com.example.model;
 
+public class Computador extends Equipamento { // Herança: Computador é um Equipamento
+    private int memoriaRAM; // Atributo exclusivo da subclasse Computador
 
-public class Computador extends Equipamento {
-    
-    // Atributo específico da classe Computador
-    private int memoriaRam;
-
-    // Construtor que recebe os dados da mãe e o atributo próprio da filha
-    public Computador(int patrimonio, String descricao, String laboratorio, String situacao, int memoriaRam) {
-        // 'super' chama o construtor da classe mãe (Equipamento) para preencher os dados comuns
-        super(patrimonio, descricao, laboratorio, situacao);
-        this.memoriaRam = memoriaRam; // Inicializa o atributo exclusivo
+    public Computador(int patrimonio, String descricao, String laboratorio, String situacao, int memoriaRAM) {
+        super(patrimonio, descricao, laboratorio, situacao); // Executa o construtor da classe mae (Equipamento)
+        this.memoriaRAM = memoriaRAM; // Atribui a quantidade de memoria RAM em GB
     }
 
-    // Métodos Getter e Setter para a memória RAM
-    public int getMemoriaRAM() { return memoriaRam; }
-    public void setMemoriaRAM(int memoriaRam) { this.memoriaRam = memoriaRam; }
+    public int getMemoriaRAM() { return memoriaRAM; } // Retorna a memoria RAM
+    public void setMemoriaRAM(int memoriaRAM) { this.memoriaRAM = memoriaRAM; } // Altera a memoria RAM
 }
