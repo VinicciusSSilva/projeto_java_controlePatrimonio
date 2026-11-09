@@ -17,7 +17,7 @@ USE `laboratorio_db` ;
 -- -----------------------------------------------------
 -- Table `laboratorio_db`.`equipamento`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`equipamento` (
+CREATE TABLE IF NOT EXISTS `laboratorio_db`.`equipamento` (
   `patrimonio` INT NOT NULL CHECK (`patrimonio` > 0) ,
   `descricao` VARCHAR(500) NOT NULL,
   `laboratorio` VARCHAR(45) NOT NULL,
@@ -27,9 +27,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`computador`
+-- Table `laboratorio_db`.`computador`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`computador` (
+CREATE TABLE IF NOT EXISTS `laboratorio_db`.`computador` (
   `memoriaRam` INT NOT NULL CHECK (`memoriaRam` > 0)  ,
   `equipamento_patrimonio` INT NOT NULL,
   PRIMARY KEY (`equipamento_patrimonio`),
@@ -42,9 +42,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`projetor`
+-- Table `laboratorio_db`.`projetor`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`projetor` (
+CREATE TABLE IF NOT EXISTS `laboratorio_db`.`projetor` (
   `luminosidade` INT NOT NULL CHECK (`luminosidade` > 0) ,
   `equipamento_patrimonio` INT NOT NULL,
   PRIMARY KEY (`equipamento_patrimonio`),
