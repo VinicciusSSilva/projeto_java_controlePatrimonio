@@ -1,23 +1,19 @@
 package br.com.example.model;
 
-public class Computador { 
-     //garante o encapsulamento, impedindo o acesso direto de fora da classe
-    private int memoriaRAM;
 
-    public Computador() {
-        super();// Chama o construtor sem parâmetros da superclasse
-    }
+public class Computador extends Equipamento {
+    
+    // Atributo específico da classe Computador
+    private int memoriaRam;
 
-    public Computador(int patrimonio, String descricao, String laboratorio, String situacao, int memoriaRAM) {
+    // Construtor que recebe os dados da mãe e o atributo próprio da filha
+    public Computador(int patrimonio, String descricao, String laboratorio, String situacao, int memoriaRam) {
+        // 'super' chama o construtor da classe mãe (Equipamento) para preencher os dados comuns
         super(patrimonio, descricao, laboratorio, situacao);
-        this.memoriaRAM = memoriaRAM;
+        this.memoriaRam = memoriaRam; // Inicializa o atributo exclusivo
     }
 
-    public int getMemoriaRAM() {
-        return memoriaRAM;
-    }
-
-    public void setMemoriaRAM(int memoriaRAM) {
-        this.memoriaRAM = memoriaRAM;
-    }
+    // Métodos Getter e Setter para a memória RAM
+    public int getMemoriaRAM() { return memoriaRam; }
+    public void setMemoriaRAM(int memoriaRam) { this.memoriaRam = memoriaRam; }
 }
