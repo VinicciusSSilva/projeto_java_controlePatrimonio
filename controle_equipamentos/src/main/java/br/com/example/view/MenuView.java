@@ -1,175 +1,170 @@
 package br.com.example.view;
 
+import javax.swing.JOptionPane;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-import br.com.example.DAO.EquipamentoDAO;
+import br.com.example.controller.EquipamentoController;
 import br.com.example.model.Computador;
 import br.com.example.model.Equipamento;
 import br.com.example.model.Projetor;
 
 public class MenuView {
-    private final Scanner scanner = new Scanner(System.in);
-    private final EquipamentoDAO equipamentoDAO = new EquipamentoDAO();
+    
+    private final EquipamentoController controller = new EquipamentoController(); // Instancia a camada de controle
 
     public void iniciar() {
-        int opcao;
+        String[] opcoes = {"Cadastrar Computador", "Cadastrar Projetor", "Listar Todos", "Buscar por Patrimônio", "Atualizar Equipamento", "Excluir Equipamento", "Sair"};
+        int escolha;
+        
         do {
-            exibirMenu();
-            opcao = lerInteiro("Escolha uma opção: ");
+            // Monta o menu de botoes usando o JOptionPane
+            escolha = JOptionPane.showOptionDialog(null, 
+                    "Escolha uma operação:", "Controle de Laboratório", 
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
+                    null, opcoes, opcoes[0]);
 
             try {
-                switch (opcao) {
-                    case 1:
-                        cadastrarComputador();
+                switch (escolha) {
+                    case 0: cadastrar(true); break; // Cadastra computador
+                    case 1: cadastrar(false); break; // Cadastra projetor
+                    case 2: listarEquipamentos(); break; // Lista tudo
+                    case 3: buscarEquipamento(); break; // Busca pelo patrimonio
+                    case 4: atualizarEquipamento(); break; // Atualiza dados
+                    case 5: excluirEquipamento(); break; // Apaga do banco
+                    case 6: // Opcao de sair
+                    case JOptionPane.CLOSED_OPTION: // Caso o usuario feche a janela no X
+                        JOptionPane.showMessageDialog(null, "Encerrando o sistema.");
+                        escolha = 6;
                         break;
-                    case 2:
-                        cadastrarProjetor();
-                        break;
-                    case 3:
-                        listarEquipamentos();
-                        break;
-                    case 4:
-                        excluirEquipamento();
-                        break;
-                    case 0:
-                        System.out.println("Encerrando o sistema.");
-                        break;
-                    default:
-                        System.out.println("Opção inválida.");
                 }
-            } catch (RuntimeException e) {
-                System.err.println("Não foi possível concluir a operação: " + e.getMessage());
+            } catch (Exception e) { // Captura erros nao previstos nas telas
+                JOptionPane.showMessageDialog(null, "Erro inesperado: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
-        } while (opcao != 0);
-
-        scanner.close();
+        } while (escolha != 6); // Mantem em loop ate o usuario pedir pra sair
     }
 
-    private void exibirMenu() {
-        System.out.println("\n=== Controle de Equipamentos ===");
-        System.out.println("1. Cadastrar computador");
-        System.out.println("2. Cadastrar projetor");
-        System.out.println("3. Listar equipamentos");
-        System.out.println("4. Excluir equipamento");
-        System.out.println("0. Sair");
-    }
+    private void cadastrar(boolean isComputador) {
+        try {
+            int patrimonio = Integer.parseInt(JOptionPane.showInputDialog("Patrimônio:")); // Pede o patrimonio
+            String descricao = JOptionPane.showInputDialog("Descrição:"); // Pede a descricao
+            String laboratorio = JOptionPane.showInputDialog("Laboratório:"); // Pede o laboratorio
+            String situacao = escolherSituacao(); // Abre janela de situacao
+            
+            if (situacao == null) return; // Aborta se o usuario fechar a janela
 
-    private void cadastrarComputador() {
-        int patrimonio = lerInteiroPositivo("Patrimônio: ");
-        String descricao = lerTexto("Descrição: ", 500);
-        String laboratorio = lerTexto("Laboratório: ", 45);
-        String situacao = lerSituacao();
-        int memoriaRAM = lerInteiroPositivo("Memória RAM (GB): ");
+            Equipamento eq;
+            if (isComputador) { // Condicional para o tipo do equipamento
+                int ram = Integer.parseInt(JOptionPane.showInputDialog("Memória RAM (GB):"));
+                eq = new Computador(patrimonio, descricao, laboratorio, situacao, ram); // Instancia a classe filha
+            } else {
+                int lum = Integer.parseInt(JOptionPane.showInputDialog("Luminosidade (Lumens):"));
+                eq = new Projetor(patrimonio, descricao, laboratorio, situacao, lum); // Instancia a classe filha
+            }
 
-        Computador computador = new Computador(patrimonio, descricao, laboratorio, situacao, memoriaRAM);
-        if (equipamentoDAO.cadastrar(computador)) {
-            System.out.println("Computador cadastrado com sucesso.");
-        } else {
-            System.out.println("Não foi possível cadastrar o computador. Verifique os dados e o banco de dados.");
-        }
-    }
-
-    private void cadastrarProjetor() {
-        int patrimonio = lerInteiroPositivo("Patrimônio: ");
-        String descricao = lerTexto("Descrição: ", 500);
-        String laboratorio = lerTexto("Laboratório: ", 45);
-        String situacao = lerSituacao();
-        int luminosidade = lerInteiroPositivo("Luminosidade: ");
-
-        Projetor projetor = new Projetor(patrimonio, descricao, laboratorio, situacao, luminosidade);
-        if (equipamentoDAO.cadastrar(projetor)) {
-            System.out.println("Projetor cadastrado com sucesso.");
-        } else {
-            System.out.println("Não foi possível cadastrar o projetor. Verifique os dados e o banco de dados.");
+            if (controller.cadastrarEquipamento(eq)) { // Repassa para o controller
+                JOptionPane.showMessageDialog(null, "Cadastrado com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Erro ao cadastrar. Verifique o banco de dados.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) { // Se falhar na conversao de texto pra numero printa o erro
+            JOptionPane.showMessageDialog(null, "Valores numéricos inválidos.", "Erro de Entrada", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void listarEquipamentos() {
-        ArrayList<Equipamento> equipamentos = equipamentoDAO.listar();
-        if (equipamentos.isEmpty()) {
-            System.out.println("Nenhum equipamento encontrado.");
+        ArrayList<Equipamento> lista = controller.listarEquipamentos(); // Pede a lista ao controller
+        if (lista.isEmpty()) { // Verifica se a lista esta vazia
+            JOptionPane.showMessageDialog(null, "Nenhum equipamento encontrado.");
             return;
         }
 
-        System.out.println("\n=== Equipamentos cadastrados ===");
-        for (Equipamento equipamento : equipamentos) {
-            System.out.println("------------------------------");
-            System.out.println("Tipo: " + (equipamento instanceof Computador ? "Computador" : "Projetor"));
-            System.out.println("Patrimônio: " + equipamento.getPatrimonio());
-            System.out.println("Descrição: " + equipamento.getDescricao());
-            System.out.println("Laboratório: " + equipamento.getLaboratorio());
-            System.out.println("Situação: " + equipamento.getSituacao());
-
-            if (equipamento instanceof Computador) {
-                System.out.println("Memória RAM: " + ((Computador) equipamento).getMemoriaRAM() + " GB");
-            } else if (equipamento instanceof Projetor) {
-                System.out.println("Luminosidade: " + ((Projetor) equipamento).getLuminosidade());
-            }
+        StringBuilder sb = new StringBuilder("Equipamentos:\n\n");
+        for (Equipamento eq : lista) { // Percorre cada objeto do resultado
+            sb.append("Patrimônio: ").append(eq.getPatrimonio())
+              .append(" | ").append(eq.getDescricao())
+              .append(" (").append(eq.getSituacao()).append(")\n");
         }
-        System.out.println("------------------------------");
+        
+        JOptionPane.showMessageDialog(null, sb.toString(), "Lista", JOptionPane.INFORMATION_MESSAGE); // Imprime a lista na tela
+    }
+
+    private void buscarEquipamento() {
+        try {
+            int patrimonio = Integer.parseInt(JOptionPane.showInputDialog("Informe o Patrimônio:"));
+            Equipamento eq = controller.buscarEquipamento(patrimonio); // Pede a busca ao controller
+            
+            if (eq != null) { // Verifica se o banco retornou algo
+                String detalhes = "Tipo: " + (eq instanceof Computador ? "Computador" : "Projetor") + "\n"
+                                + "Patrimônio: " + eq.getPatrimonio() + "\n"
+                                + "Descrição: " + eq.getDescricao() + "\n"
+                                + "Laboratório: " + eq.getLaboratorio() + "\n"
+                                + "Situação: " + eq.getSituacao() + "\n";
+                                
+                if (eq instanceof Computador) detalhes += "RAM: " + ((Computador)eq).getMemoriaRAM() + "GB";
+                else detalhes += "Luminosidade: " + ((Projetor)eq).getLuminosidade() + " Lumens";
+                
+                JOptionPane.showMessageDialog(null, detalhes, "Detalhes", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Equipamento não encontrado.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Patrimônio inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void atualizarEquipamento() {
+        try {
+            int patrimonio = Integer.parseInt(JOptionPane.showInputDialog("Patrimônio do equipamento a atualizar:"));
+            Equipamento eq = controller.buscarEquipamento(patrimonio); // Traz os dados atuais do banco
+            
+            if (eq == null) {
+                JOptionPane.showMessageDialog(null, "Equipamento não encontrado.");
+                return;
+            }
+
+            // Mostra os valores antigos e pede os novos
+            eq.setDescricao(JOptionPane.showInputDialog("Nova Descrição:", eq.getDescricao()));
+            eq.setLaboratorio(JOptionPane.showInputDialog("Novo Laboratório:", eq.getLaboratorio()));
+            eq.setSituacao(escolherSituacao());
+            
+            if (eq instanceof Computador) { // Condicional para o tipo do equipamento
+                String ram = JOptionPane.showInputDialog("Nova RAM (GB):", ((Computador)eq).getMemoriaRAM());
+                ((Computador)eq).setMemoriaRAM(Integer.parseInt(ram));
+            } else if (eq instanceof Projetor) {
+                String lum = JOptionPane.showInputDialog("Nova Luminosidade:", ((Projetor)eq).getLuminosidade());
+                ((Projetor)eq).setLuminosidade(Integer.parseInt(lum));
+            }
+
+            if (controller.atualizarEquipamento(eq)) { // Manda pro controller salvar as alteracoes
+                JOptionPane.showMessageDialog(null, "Atualizado com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Erro ao atualizar.");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Valores numéricos inválidos.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void excluirEquipamento() {
-        int patrimonio = lerInteiroPositivo("Patrimônio do equipamento a excluir: ");
-        if (equipamentoDAO.excluir(patrimonio)) {
-            System.out.println("Equipamento excluído com sucesso.");
-        } else {
-            System.out.println("Nenhum equipamento foi excluído. Confira o patrimônio informado.");
+        try {
+            int patrimonio = Integer.parseInt(JOptionPane.showInputDialog("Patrimônio para excluir:")); // Pede o patrimonio correto
+            if (controller.excluirEquipamento(patrimonio)) { // Repassa o delete para o controller
+                JOptionPane.showMessageDialog(null, "Excluído com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(null, "Nenhum equipamento foi excluído.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (NumberFormatException e) { // Se falhar na exclusao printa o erro
+            JOptionPane.showMessageDialog(null, "Patrimônio inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private String lerSituacao() {
-        while (true) {
-            System.out.println("Situação:");
-            System.out.println("1. Disponível");
-            System.out.println("2. Em Uso");
-            System.out.println("3. Em Manutenção");
-            int opcao = lerInteiro("Escolha a situação: ");
-
-            switch (opcao) {
-                case 1:
-                    return "Disponível";
-                case 2:
-                    return "Em Uso";
-                case 3:
-                    return "Em Manutenção";
-                default:
-                    System.out.println("Opção inválida. Escolha 1, 2 ou 3.");
-            }
-        }
-    }
-
-    private int lerInteiroPositivo(String mensagem) {
-        while (true) {
-            int valor = lerInteiro(mensagem);
-            if (valor > 0) {
-                return valor;
-            }
-            System.out.println("Informe um número maior que zero.");
-        }
-    }
-
-    private int lerInteiro(String mensagem) {
-        while (true) {
-            System.out.print(mensagem);
-            String entrada = scanner.nextLine().trim();
-            try {
-                return Integer.parseInt(entrada);
-            } catch (NumberFormatException e) {
-                System.out.println("Entrada inválida. Digite um número inteiro.");
-            }
-        }
-    }
-
-    private String lerTexto(String mensagem, int tamanhoMaximo) {
-        while (true) {
-            System.out.print(mensagem);
-            String entrada = scanner.nextLine().trim();
-            if (!entrada.isEmpty() && entrada.length() <= tamanhoMaximo) {
-                return entrada;
-            }
-            System.out.println("O texto é obrigatório e deve ter no máximo " + tamanhoMaximo + " caracteres.");
-        }
+    private String escolherSituacao() {
+        String[] opcoes = {"Disponível", "Em uso", "Em manutenção"}; // Grafia exata exigida pelo enum do banco
+        int escolha = JOptionPane.showOptionDialog(null, 
+                "Selecione a situação:", "Situação", 
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, 
+                null, opcoes, opcoes[0]);
+                
+        return (escolha >= 0) ? opcoes[escolha] : null; // Retorna a string escolhida
     }
 }

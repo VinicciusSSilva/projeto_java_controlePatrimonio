@@ -1,4 +1,4 @@
-    package br.com.example.DAO;
+package br.com.example.DAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -87,7 +87,7 @@ public class EquipamentoDAO {
 
                 if (resultado.getObject("memoriaRam") != null) { // Verifica se tem memoria
                     int ram = resultado.getInt("memoriaRam");
-                    Computador c = new Computador(patrimonio, descricao, laboratorio, situacao, ram);  
+                    Computador c = new Computador(patrimonio, descricao, laboratorio, situacao, ram);
                     lista.add(c); // Adiciona computador na lista
                 } else if (resultado.getObject("luminosidade") != null) { // Verifica se tem luminosidade
                     int lum = resultado.getInt("luminosidade");
@@ -112,6 +112,94 @@ public class EquipamentoDAO {
         } catch (SQLException e) { // Se falhar na exclusao printa o erro
             System.out.println("Erro ao excluir o equipamento: " + e.getMessage());
             return false;
+        }
+    }
+
+    public Equipamento buscar(int patrimonio) {
+        String sql = "SELECT e.descricao, e.laboratorio, e.situacao, c.memoriaRam, p.luminosidade " +
+                "FROM equipamento e " +
+                "LEFT JOIN computador c ON e.patrimonio = c.equipamento_patrimonio " +
+                "LEFT JOIN projetor p ON e.patrimonio = p.equipamento_patrimonio " +
+                "WHERE e.patrimonio = ?"; // Busca pelo patrimonio unindo as tres tabelas
+
+        try (Connection conexao = Conexao.conectar(); // Tenta conectar
+                PreparedStatement comando = conexao.prepareStatement(sql)) { // Prepara o select
+
+            comando.setInt(1, patrimonio);
+            try (ResultSet resultado = comando.executeQuery()) { // Executa e guarda o resultado
+                if (resultado.next()) { // Percorre a linha do resultado
+                    String descricao = resultado.getString("descricao");
+                    String laboratorio = resultado.getString("laboratorio");
+                    String situacao = resultado.getString("situacao");
+
+                    if (resultado.getObject("memoriaRam") != null) { // Verifica se tem memoria
+                        return new Computador(patrimonio, descricao, laboratorio, situacao,
+                                resultado.getInt("memoriaRam")); // Retorna computador
+                    } else if (resultado.getObject("luminosidade") != null) { // Verifica se tem luminosidade
+                        return new Projetor(patrimonio, descricao, laboratorio, situacao,
+                                resultado.getInt("luminosidade")); // Retorna projetor
+                    }
+                }
+            }
+        } catch (SQLException e) { // Se falhar na busca printa o erro
+            System.err.println("Erro ao buscar equipamento: " + e.getMessage());
+        }
+        return null; // Retorna nulo se nao encontrar
+    }
+
+    public boolean atualizar(Equipamento equipamento) {
+        String sqlEquip = "UPDATE equipamento SET descricao = ?, laboratorio = ?, situacao = ? WHERE patrimonio = ?";
+        Connection conexao = null; // Deixa a conexao vazia para o try
+
+        try {
+            conexao = Conexao.conectar(); // Tenta conectar
+            conexao.setAutoCommit(false); // Desativa o auto commit do sql
+
+            try (PreparedStatement comando = conexao.prepareStatement(sqlEquip)) { // Prepara pra atualizar no banco
+                comando.setString(1, equipamento.getDescricao());
+                comando.setString(2, equipamento.getLaboratorio());
+                comando.setString(3, equipamento.getSituacao());
+                comando.setInt(4, equipamento.getPatrimonio());
+                comando.executeUpdate();
+            }
+
+            if (equipamento instanceof Computador) { // Condicional para o tipo do equipamento
+                String sqlComp = "UPDATE computador SET memoriaRam = ? WHERE equipamento_patrimonio = ?";
+                try (PreparedStatement stmtComp = conexao.prepareStatement(sqlComp)) {
+                    stmtComp.setInt(1, ((Computador) equipamento).getMemoriaRAM());
+                    stmtComp.setInt(2, equipamento.getPatrimonio());
+                    stmtComp.executeUpdate();
+                }
+            } else if (equipamento instanceof Projetor) {
+                String sqlProj = "UPDATE projetor SET luminosidade = ? WHERE equipamento_patrimonio = ?";
+                try (PreparedStatement stmtProj = conexao.prepareStatement(sqlProj)) {
+                    stmtProj.setInt(1, ((Projetor) equipamento).getLuminosidade());
+                    stmtProj.setInt(2, equipamento.getPatrimonio());
+                    stmtProj.executeUpdate();
+                }
+            }
+
+            conexao.commit(); // Confirma as alterações nas duas tabelas
+            return true;
+
+        } catch (SQLException e) { // Se não conectar printa o erro
+            if (conexao != null) { // Verifica se a conexao existe para desfazer
+                try {
+                    conexao.rollback(); // Desfaz a inserção principal se a filha falhar
+                } catch (SQLException ex) {
+                    System.err.println("Erro ao realizar rollback: " + ex.getMessage());
+                }
+            }
+            return false;
+        } finally { // Fecha a conexão com o banco em segurança.
+            if (conexao != null) {
+                try {
+                    conexao.setAutoCommit(true); // Restaura o padrao original
+                    conexao.close(); // Fecha a conexao definitivamente
+                } catch (SQLException e) {
+                    System.err.println("Erro ao fechar conexão: " + e.getMessage());
+                }
+            }
         }
     }
 }
