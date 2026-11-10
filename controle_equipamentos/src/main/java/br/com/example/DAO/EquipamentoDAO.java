@@ -147,6 +147,38 @@ public class EquipamentoDAO {
         return null; // Retorna nulo se nao encontrar
     }
 
+    public ArrayList<Equipamento> listarPorLaboratorio(String laboratorio) {
+        ArrayList<Equipamento> lista = new ArrayList<>();
+        String sql = "SELECT e.patrimonio, e.descricao, e.laboratorio, e.situacao, c.memoriaRam, p.luminosidade " +
+                "FROM equipamento e " +
+                "LEFT JOIN computador c ON e.patrimonio = c.equipamento_patrimonio " +
+                "LEFT JOIN projetor p ON e.patrimonio = p.equipamento_patrimonio " +
+                "WHERE e.laboratorio LIKE ?"; // Filtra pelo laboratório
+
+        try (Connection conexao = Conexao.conectar();
+                PreparedStatement comando = conexao.prepareStatement(sql)) {
+
+            comando.setString(1, "%" + laboratorio + "%"); // Permite busca parcial
+            try (ResultSet resultado = comando.executeQuery()) {
+                while (resultado.next()) {
+                    int patrimonio = resultado.getInt("patrimonio");
+                    String descricao = resultado.getString("descricao");
+                    String lab = resultado.getString("laboratorio");
+                    String situacao = resultado.getString("situacao");
+
+                    if (resultado.getObject("memoriaRam") != null) {
+                        lista.add(new Computador(patrimonio, descricao, lab, situacao, resultado.getInt("memoriaRam")));
+                    } else if (resultado.getObject("luminosidade") != null) {
+                        lista.add(new Projetor(patrimonio, descricao, lab, situacao, resultado.getInt("luminosidade")));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar por laboratório: " + e.getMessage());
+        }
+        return lista;
+    }
+
     public boolean atualizar(Equipamento equipamento) {
         String sqlEquip = "UPDATE equipamento SET descricao = ?, laboratorio = ?, situacao = ? WHERE patrimonio = ?";
         Connection conexao = null; // Deixa a conexao vazia para o try

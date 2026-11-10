@@ -43,6 +43,14 @@ public class EquipamentoController {
         return equipamentoDAO.buscar(patrimonio); // Solicita a busca ao DAO
     }
 
+    
+    public ArrayList<Equipamento> listarPorLaboratorio(String laboratorio) {
+        if (laboratorio == null || laboratorio.trim().isEmpty()) {
+            return new ArrayList<>(); // Retorna vazio se a busca for inválida
+        }
+        return equipamentoDAO.listarPorLaboratorio(laboratorio);
+    }
+
     public boolean atualizarEquipamento(Equipamento equipamento) {
         if (equipamento == null || equipamento.getPatrimonio() <= 0) { // Valida se o objeto e patrimonio sao validos
             System.err.println("Erro: Equipamento ou patrimônio inválido para atualização.");
