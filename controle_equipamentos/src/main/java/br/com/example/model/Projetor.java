@@ -1,6 +1,6 @@
 package br.com.example.model;
 
-public class Projetor {
+public class Projetor extends Equipamento {
     private int luminosidade;
 
     public Projetor() {

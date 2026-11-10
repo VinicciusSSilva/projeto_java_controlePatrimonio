@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `laboratorio_db`.`computador` (
   PRIMARY KEY (`equipamento_patrimonio`),
   CONSTRAINT `fk_computador_equipamento`
     FOREIGN KEY (`equipamento_patrimonio`)
-    REFERENCES `mydb`.`equipamento` (`patrimonio`)
+    REFERENCES `laboratorio_db`.`equipamento` (`patrimonio`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `laboratorio_db`.`projetor` (
   PRIMARY KEY (`equipamento_patrimonio`),
   CONSTRAINT `fk_projetor_equipamento1`
     FOREIGN KEY (`equipamento_patrimonio`)
-    REFERENCES `mydb`.`equipamento` (`patrimonio`)
+    REFERENCES `laboratorio_db`.`equipamento` (`patrimonio`)
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

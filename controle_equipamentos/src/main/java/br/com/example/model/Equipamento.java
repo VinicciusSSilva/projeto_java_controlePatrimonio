@@ -6,6 +6,9 @@ public class Equipamento {
     private String laboratorio;
     private String situacao;
 
+    public Equipamento() {
+    }
+
     // Constructor
     public Equipamento(int patrimonio, String descricao, String laboratorio, String situacao) {
         this.patrimonio = patrimonio;

@@ -1,6 +1,6 @@
 package br.com.example.model;
 
-public class Computador { 
+public class Computador extends Equipamento {
      //garante o encapsulamento, impedindo o acesso direto de fora da classe
     private int memoriaRAM;
 
